@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">MoviesApp_Latiris</string>
+    <string name="no_movie_id">No movie ID provided</string>
+    <string name="failed_to_fetch_details">Failed to fetch movie details</string>
+    <string name="trailer_not_available">Trailer not available</string>
+    <string name="location_permission_denied">Location permission denied</string>
+    <string name="last_known_location_not_available">Last known location not available</string>
+    <string name="error_trailer_unavailable">Trailer not available</string>
+    <string name="error_location_unavailable">Last known location not available</string>
+    <string name="error_location_permission_denied">Location permission denied</string>
+    <string name="error_fetch_details">Failed to fetch movie details</string>
+    <string name="play_trailer">Play Trailer</string>
+</resources>
