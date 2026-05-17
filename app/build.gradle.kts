@@ -1,4 +1,4 @@
- plugins {
+plugins {
     alias(libs.plugins.android.application)
     id("com.google.gms.google-services") version "4.4.0"
 }
@@ -54,6 +54,15 @@ dependencies {
     // Google Auth
     implementation(libs.google.play.services.auth)
     
+    // CameraX
+    implementation(libs.camerax.core)
+    implementation(libs.camerax.camera2)
+    implementation(libs.camerax.lifecycle)
+    implementation(libs.camerax.view)
+
+    // ML Kit
+    implementation(libs.mlkit.face.detection)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

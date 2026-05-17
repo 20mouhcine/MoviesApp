@@ -41,12 +41,14 @@ public class MoviesActivity extends AppCompatActivity {
     private EditText searchEditText;
     private ImageView searchButton;
     private ImageView voiceSearchButton;
+    private ImageView moodButton;
     private MyMovieAdapter movieAdapter;
     private GenreAdapter genreAdapter;
     private RequestQueue requestQueue;
 
     private ActivityResultLauncher<String> audioPermissionLauncher;
     private ActivityResultLauncher<Intent> voiceSearchLauncher;
+    private ActivityResultLauncher<Intent> moodDetectionLauncher;
 
     private List<GenreData> genreList = new ArrayList<>();
     private int selectedGenreId = -1;
@@ -67,6 +69,7 @@ public class MoviesActivity extends AppCompatActivity {
 
         initViews();
         initVoiceSearch();
+        initMoodDetection();
         requestQueue = Volley.newRequestQueue(this);
         
         setupMoviesRecyclerView();
@@ -84,6 +87,7 @@ public class MoviesActivity extends AppCompatActivity {
         searchEditText = findViewById(R.id.searchEditText);
         searchButton = findViewById(R.id.searchButton);
         voiceSearchButton = findViewById(R.id.voiceSearchButton);
+        moodButton = findViewById(R.id.moodButton);
 
         // Add TextWatcher for real-time search
         searchEditText.addTextChangedListener(new TextWatcher() {
@@ -115,6 +119,7 @@ public class MoviesActivity extends AppCompatActivity {
         });
 
         voiceSearchButton.setOnClickListener(v -> startVoiceSearch());
+        moodButton.setOnClickListener(v -> startMoodDetection());
 
         searchEditText.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
@@ -174,6 +179,45 @@ public class MoviesActivity extends AppCompatActivity {
             voiceSearchLauncher.launch(intent);
         } else {
             Toast.makeText(this, "Voice search not available", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void initMoodDetection() {
+        moodDetectionLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                        int genreId = result.getData().getIntExtra(
+                                MoodDetectionActivity.EXTRA_GENRE_ID, -1);
+                        String label = result.getData().getStringExtra(
+                                MoodDetectionActivity.EXTRA_MOOD_LABEL);
+                        applyMoodRecommendation(label, genreId);
+                    } else {
+                        applyMoodRecommendation("Neutral", -1);
+                    }
+                });
+    }
+
+    private void startMoodDetection() {
+        Intent intent = new Intent(this, MoodDetectionActivity.class);
+        moodDetectionLauncher.launch(intent);
+    }
+
+    private void applyMoodRecommendation(String label, int genreId) {
+        currentQuery = null;
+        selectedGenreId = genreId;
+        currentPage = 1;
+        fetchMovies(null, selectedGenreId, currentPage);
+
+        for (GenreData g : genreList) {
+            boolean isSelected = g.getId() == selectedGenreId
+                    || (selectedGenreId == -1 && g.getId() == -1);
+            g.setSelected(isSelected);
+        }
+        genreAdapter.notifyDataSetChanged();
+
+        if (label != null && !label.trim().isEmpty()) {
+            Toast.makeText(this, "Mood: " + label, Toast.LENGTH_SHORT).show();
         }
     }
 
