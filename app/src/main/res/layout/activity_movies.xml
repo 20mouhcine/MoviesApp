@@ -31,6 +31,15 @@
             android:inputType="text" />
 
         <ImageView
+            android:id="@+id/voiceSearchButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:contentDescription="Voice search"
+            android:padding="8dp"
+            android:src="@drawable/ic_mic"
+            app:tint="#FFC107" />
+
+        <ImageView
             android:id="@+id/searchButton"
             android:layout_width="40dp"
             android:layout_height="40dp"

@@ -1,15 +1,22 @@
 package com.example.moviesapp_latiris;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.speech.RecognizerIntent;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Toast;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -33,10 +40,14 @@ public class MoviesActivity extends AppCompatActivity {
     private RecyclerView genreRecyclerView;
     private EditText searchEditText;
     private ImageView searchButton;
+    private ImageView voiceSearchButton;
     private MyMovieAdapter movieAdapter;
     private GenreAdapter genreAdapter;
     private RequestQueue requestQueue;
-    
+
+    private ActivityResultLauncher<String> audioPermissionLauncher;
+    private ActivityResultLauncher<Intent> voiceSearchLauncher;
+
     private List<GenreData> genreList = new ArrayList<>();
     private int selectedGenreId = -1;
     
@@ -55,6 +66,7 @@ public class MoviesActivity extends AppCompatActivity {
         setContentView(R.layout.activity_movies);
 
         initViews();
+        initVoiceSearch();
         requestQueue = Volley.newRequestQueue(this);
         
         setupMoviesRecyclerView();
@@ -71,6 +83,7 @@ public class MoviesActivity extends AppCompatActivity {
         genreRecyclerView = findViewById(R.id.genreRecyclerView);
         searchEditText = findViewById(R.id.searchEditText);
         searchButton = findViewById(R.id.searchButton);
+        voiceSearchButton = findViewById(R.id.voiceSearchButton);
 
         // Add TextWatcher for real-time search
         searchEditText.addTextChangedListener(new TextWatcher() {
@@ -101,6 +114,8 @@ public class MoviesActivity extends AppCompatActivity {
             performSearch();
         });
 
+        voiceSearchButton.setOnClickListener(v -> startVoiceSearch());
+
         searchEditText.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                 searchEditText.removeCallbacks(searchRunnable);
@@ -109,6 +124,57 @@ public class MoviesActivity extends AppCompatActivity {
             }
             return false;
         });
+    }
+
+    private void initVoiceSearch() {
+        audioPermissionLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(),
+                isGranted -> {
+                    if (isGranted) {
+                        launchVoiceSearchIntent();
+                    } else {
+                        Toast.makeText(this, "Microphone permission denied", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+        voiceSearchLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                        ArrayList<String> results = result.getData()
+                                .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                        if (results != null && !results.isEmpty()) {
+                            String spokenQuery = results.get(0).trim();
+                            if (!spokenQuery.isEmpty()) {
+                                searchEditText.setText(spokenQuery);
+                                searchEditText.setSelection(spokenQuery.length());
+                                searchEditText.removeCallbacks(searchRunnable);
+                                performSearch();
+                            }
+                        }
+                    }
+                });
+    }
+
+    private void startVoiceSearch() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
+                == PackageManager.PERMISSION_GRANTED) {
+            launchVoiceSearchIntent();
+        } else {
+            audioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO);
+        }
+    }
+
+    private void launchVoiceSearchIntent() {
+        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Search movies");
+
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            voiceSearchLauncher.launch(intent);
+        } else {
+            Toast.makeText(this, "Voice search not available", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void setupMoviesRecyclerView() {

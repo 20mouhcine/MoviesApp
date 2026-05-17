@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "422852147244",
+    "project_id": "moviesapp-2d551",
+    "storage_bucket": "moviesapp-2d551.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:422852147244:android:cd8d2a5a326b78b7cc7989",
+        "android_client_info": {
+          "package_name": "com.example.moviesapp_latiris"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "422852147244-q9bjf9kntr17e98pqprc5fd3mqpfo22r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCGu_bNkR2U68IwOvr2qB0FQ0956MWK1fY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "422852147244-q9bjf9kntr17e98pqprc5fd3mqpfo22r.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
